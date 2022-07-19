@@ -24,7 +24,7 @@ set(header_files
 
 target_sources(stlbfgs PRIVATE ${source_files})
   
-target_include_directories(stlbfgs INTERFACE 
+target_include_directories(stlbfgs PUBLIC 
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include)
   
 set_target_properties(stlbfgs
