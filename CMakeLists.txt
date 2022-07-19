@@ -15,21 +15,24 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 set(source_files 
- "${CMAKE_CURRENT_SOURCE_DIR}/linesearch.cpp"
- "${CMAKE_CURRENT_SOURCE_DIR}/stlbfgs.cpp")
+ "${CMAKE_CURRENT_SOURCE_DIR}/src/linesearch.cpp"
+ "${CMAKE_CURRENT_SOURCE_DIR}/src/stlbfgs.cpp")
 
 set(header_files
-  "${CMAKE_CURRENT_SOURCE_DIR}/linesearch.h"
-  "${CMAKE_CURRENT_SOURCE_DIR}/stlbfgs.h")
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/stlbfgs/linesearch.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/stlbfgs/stlbfgs.h")
 
 target_sources(stlbfgs PRIVATE ${source_files})
-  
+
+set_target_properties(stlbfgs
+  PROPERTIES
+  PUBLIC_HEADER "${header_files}")
+
 target_include_directories(stlbfgs PUBLIC 
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include)
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
   
 set_target_properties(stlbfgs
   PROPERTIES
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED ON
   CXX_EXTENSIONS OFF)
-  
