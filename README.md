@@ -46,7 +46,8 @@ ctest
 
 # Adaptation to LIGEN
 
-We are going to use this library to calculate the minumum of a molecule's Potential Energy Function. Such function is N dimensional, with N = NUM_MOLECULE_ATOMS * 3, and is the sum of seven contributions all depending on coordinates of interacting atoms.
+We are going to use this library to calculate the minumum of a molecule's Potential Energy Function. Such function is N dimensional, where 
+N = NUM_MOLECULE_ATOMS * 3, and is the sum of seven contributions all depending on coordinates of interacting atoms [7].
 
 The minimum corrensponds to a point in a NUM_MOLECULE_ATOMS * 3 dimensional space.
 
