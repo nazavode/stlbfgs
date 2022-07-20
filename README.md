@@ -46,13 +46,11 @@ ctest
 
 # Adaptation to LIGEN
 
-We are going to use this library to calculate the minumum for the Potential Energy Function of a molecule. Such function is N dimensional, with N = NUM_ATOMS * 3 and is the sum of four contributions all depending on coordinates of bonded atoms.
+We are going to use this library to calculate the minumum of a molecule's Potential Energy Function. Such function is N dimensional, with N = NUM_MOLECULE_ATOMS * 3, and is the sum of seven contributions all depending on coordinates of interacting atoms.
 
-The minimum corrensponds to the positions of the N atoms, position at which has the smaller value. Thus it is a point in a NUM_ATOMS * 3 dimensional space.
+The minimum corrensponds to a point in a NUM_MOLECULE_ATOMS * 3 dimensional space.
 
-We are going to modify `STLBFGS::Optimizer::run` method so it can consider coordinates from two points in space (the two atoms) while calculating the minimum value.
-
-We will use our representation of molecule on a graph to do so.
+To get the coordinates of interacting atoms, we capture in `func` our representation of a molecule, which contains all the necessary information.
 
 
 # References
@@ -69,3 +67,4 @@ We will use our representation of molecule on a graph to do so.
 
 **[6]** Gilbert JC, Lemaréchal C. Some numerical experiments with variable-storage quasi-Newton algorithms. Mathematical Programming 45, pp. 407-435, 1989.
 
+**[7]** Halgren TA, Merck molecular force field. I. Basis, form, scope, parameterization, and performance of MMFF94. J. Comput. Chem., 17: 490-519, 1996. [https://doi.org/10.1002/(SICI)1096-987X(199604)17:5/6<490::AID-JCC1>3.0.CO;2-P](https://doi.org/10.1002/(SICI)1096-987X(199604)17:5/6<490::AID-JCC1>3.0.CO;2-P)
