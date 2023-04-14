@@ -3,17 +3,39 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
-#undef NDEBUG
-#include <cassert>
-// #include "stlbfgs.h"
+#include <stdexcept>
+#include <string>
+#include <sstream>
+
 #include <stlbfgs/stlbfgs.h>
+
+namespace {
+
+void assert_fail_throw(const char *expr, const char *file, int line)
+    __attribute__((noreturn));
+
+void assert_fail_throw(const char *expr, const char *file, int line) {
+  std::ostringstream ss;
+  ss << "[ERROR] stlbfgs failed assertion at " << file << ":" << line << ": "
+     << expr << ")";
+  throw std::runtime_error(ss.str());
+}
+
+} // namespace
+
+#define STLBFGS_ASSERT(EXPR)                                                   \
+  do {                                                                         \
+    if (__builtin_expect(!(EXPR), 0)) {                                        \
+      assert_fail_throw(#EXPR, __FILE__, __LINE__);                            \
+    }                                                                          \
+  } while (0)
 
 namespace STLBFGS
 {
     // compute dot product <a,b>
     double dot(const vector &a, const vector &b)
     {
-        assert(a.size() == b.size());
+        STLBFGS_ASSERT(a.size() == b.size());
         double dot = 0;
 #pragma omp parallel for reduction(+ \
                                    : dot)
@@ -33,9 +55,9 @@ namespace STLBFGS
         const int n = static_cast<int>(s.size());
         const int m = static_cast<int>(S.size());
 
-        assert(static_cast<int>(Y.size()) == m);
-        assert(static_cast<int>(y.size()) == n);
-        assert(!m || n == static_cast<int>(S[0].size()));
+        STLBFGS_ASSERT(static_cast<int>(Y.size()) == m);
+        STLBFGS_ASSERT(static_cast<int>(y.size()) == n);
+        STLBFGS_ASSERT(!m || n == static_cast<int>(S[0].size()));
 
         if (m == history_depth)
         {
@@ -47,12 +69,12 @@ namespace STLBFGS
 
         double ys = dot(y, s);
         double yy = dot(y, y);
-        assert(std::abs(yy) > 0);
+        STLBFGS_ASSERT(std::abs(yy) > 0);
 
         if (!m1qn3_precond)
         {
             gamma = ys / yy;
-            assert(std::isfinite(gamma));
+            STLBFGS_ASSERT(std::isfinite(gamma));
         }
         else
         {
@@ -73,7 +95,7 @@ namespace STLBFGS
             for (int i = 0; i < n; i++)
             {
                 diag[i] = 1. / (dyy / (ys * diag[i]) + y[i] * y[i] / ys - dyy * s[i] * s[i] / (ys * dinvss * diag[i] * diag[i]));
-                assert(std::isfinite(diag[i]));
+                STLBFGS_ASSERT(std::isfinite(diag[i]));
             }
         }
     }
@@ -85,7 +107,7 @@ namespace STLBFGS
     {
         const int n = static_cast<int>(g.size());
         const int m = static_cast<int>(S.size());
-        assert(static_cast<int>(Y.size()) == m);
+        STLBFGS_ASSERT(static_cast<int>(Y.size()) == m);
 
         result = g;
 
@@ -97,12 +119,12 @@ namespace STLBFGS
         {
             const vector &y = Y[i];
             const vector &s = S[i];
-            assert(static_cast<int>(y.size()) == n && static_cast<int>(s.size()) == n);
+            STLBFGS_ASSERT(static_cast<int>(y.size()) == n && static_cast<int>(s.size()) == n);
 
             double sy = dot(s, y);
-            assert(std::abs(sy) > 0);
+            STLBFGS_ASSERT(std::abs(sy) > 0);
             a[i] = dot(s, result) / sy;
-            assert(std::isfinite(a[i]));
+            STLBFGS_ASSERT(std::isfinite(a[i]));
 #pragma omp parallel for
             for (int j = 0; j < n; j++)
                 result[j] -= a[i] * y[j];
@@ -117,7 +139,7 @@ namespace STLBFGS
             const vector &y = Y[i];
             const vector &s = S[i];
             double b = dot(y, result) / dot(s, y);
-            assert(std::isfinite(b));
+            STLBFGS_ASSERT(std::isfinite(b));
 #pragma omp parallel for
             for (int j = 0; j < n; j++)
                 result[j] += (a[i] - b) * s[j];
@@ -158,7 +180,7 @@ namespace STLBFGS
             }
 
             invH.mult(g, p);
-            assert(-dot(g, p) < 0);
+            STLBFGS_ASSERT(-dot(g, p) < 0);
 
             double fprev = f;
             vector xprev = x, gprev = g;
@@ -175,7 +197,7 @@ namespace STLBFGS
             };
 
             double alpha = i ? 1. : 1. / norm(g); // TODO move restoration of alpha here from linesearch routine
-            assert(std::isfinite(alpha));
+            STLBFGS_ASSERT(std::isfinite(alpha));
             Sample f0 = {0, f, -dot(g, p)}; // N.B. (unsucessfull) call to line_search_more_thuente() modifies g, so save it for subsequent call to line_search_backtracking()
             if (
                 !line_search_more_thuente(ls_func, f0, alpha, mu, eta) &&
